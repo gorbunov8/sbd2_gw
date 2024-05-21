@@ -1,32 +1,57 @@
 ---
 title: "text-mining-group-work"
 author: "Vladyslav Gorbunov, Larissa Pagliarin"
-date: "2024-05-04"
-output: html_document
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: "hpstr" 
+  html_document:
+    toc: true
+    toc_float: true
 ---
+
+## Data Import and Preparation
+
+We Import the dataset *SP500_data.csv* and make a copy to work with it and named it *data*. We copy it so we can be secure that i do not make any changes in the original dataset.
+<br>
+We use several libraries to process the tasks and get the output that is asked.
+
+
+```{r library, include=FALSE}
+# Load packages and libraries, if not already available.
+libraries = c("readxl", "ggplot2", "knitr", "dplyr")
+
+lapply(libraries, function(x) if (!(x %in% installed.packages())) {
+  install.packages(x)
+})
+
+lapply(libraries, library, quietly = TRUE, character.only = TRUE)
+```
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-Hallo
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r data, include=FALSE}
+# Load data set and make a copy of the original
+SP500_data <- read.csv("SP500_data.csv")
+data <- SP500_data
 ```
 
-## Including Plots
+<br>
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
+
+
+
+
+
+
+
+
