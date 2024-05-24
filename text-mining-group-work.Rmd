@@ -19,7 +19,7 @@ We use several libraries to process the tasks and get the output that is asked.
 
 ```{r library, include=FALSE}
 # Load packages and libraries, if not already available.
-libraries = c("readxl", "ggplot2", "knitr", "dplyr")
+libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC")
 
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
@@ -34,11 +34,139 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r data, include=FALSE}
 # Load data set and make a copy of the original
-SP500_data <- read.csv("SP500_data.csv")
-data <- SP500_data
+options(scipen=999)
+Tweets_all <- load("Tweets_all.rda")
 ```
 
 <br>
+
+## Data Exploration
+
+This section gives a concise view of the Tweets on the Swiss Univerity Social Media accounts data.
+<br>
+The dataset consists 19'575 observations and 14 variables:
+<br>
+<br>
+
+**Time Range and Tweet Frequency:**
+<br>
+
+- Tweets are from September 29, 2009, to January 26, 2023 and this indicates a long-term use of Twitter
+- The median tweet date is April 13, 2018, suggesting that half of the tweets were posted after this date and the data is skewed
+<br>
+
+*Retweet and Favorite Counts:**
+<br>
+
+- The data shows a minimum of 0 and a maximum of 267 retweets and 188 likes per tweet
+- the median and first quartile for retweets and likes are 0, indicating that many tweets receive little to no engagement
+- The `in_reply_to_screen_name` field suggests that some tweets are responses to other users, which might indicate engagement or conversation strategies used by the university
+<br>
+
+**ID and String Variables:**
+<br>
+- The `id` and `id_str` fields are technical identifiers for tweets, indicating that tweets have been collected over a wide range of tweet
+<br>
+
+**Language and University Fields:**
+<br>
+
+- The `lang` shows the common language used at the university 
+- `university` shows the abbreviation of the university
+<br>
+
+**Temporal Patterns:**
+<br>
+
+- `created_at`, `tweet_date`, `tweet_hour`, and `tweet_month` provide detailed temporal data
+- can be analyzed to understand peak times of activity and seasonal or monthly trends in tweeting behavior.
+<br>
+
+**Content Analysis**
+<br>
+
+- The full_text of tweets offers a rich source for content analysis to understand what topics are being discussed
+
+<br>
+```{r}
+head(tweets)
+summary(tweets)
+```
+
+
+
+### Data Preprocessing
+
+```{r}
+# Code to identify and possibly filter out retweets and automated tweets
+tweets <- tweets %>%
+  filter(!is.na(full_text))  # Ensures only tweets with text are analyzed
+```
+
+
+```{r}
+summary(tweets)
+```
+
+### Tweet Frequency Analysis
+
+```{r}
+# Code to analyze tweet frequencies by time and university
+tweets %>%
+  mutate(tweet_month = floor_date(created_at, "month")) %>%
+  group_by(university, tweet_month) %>%
+  summarize(count = n(), .groups = 'drop') %>%
+  ggplot(aes(x = tweet_month, y = count, fill = university)) +
+  geom_col(position = "dodge") +
+  theme_minimal() +
+  labs(title = "Monthly Tweet Frequency by University", x = "Month", y = "Number of Tweets")
+```
+### Content Analysis
+
+```{r}
+# Text mining to find common themes or words
+corpus <- Corpus(VectorSource(tweets$full_text))
+corpus <- tm_map(corpus, content_transformer(tolower))
+corpus <- tm_map(corpus, removePunctuation)
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
+dtm <- DocumentTermMatrix(corpus)
+word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
+wordcloud(names(word_freq), word_freq, max.words = 100)
+
+```
+
+
+### Engagement Analysis
+
+```{r}
+# Analysis of likes and retweets
+tweets %>%
+  group_by(university) %>%
+  summarize(total_likes = sum(favorite_count), total_retweets = sum(retweet_count), .groups = 'drop') %>%
+  ggplot(aes(x = reorder(university, total_likes), y = total_likes)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Engagement Analysis by University", x = "University", y = "Total Likes")
+
+```
+
+
+
+## Recommendations
+
+
+
+
+## Conclusion
+
+
+
+
+
+
+
+
 
 
 
