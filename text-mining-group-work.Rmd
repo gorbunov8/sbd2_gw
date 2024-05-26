@@ -95,7 +95,35 @@ summary(tweets)
 
 
 
+
+
 ### Data Preprocessing
+
+```{r}
+# Corpus: Collection of text documents that generally serves as a basis for analysis in text processing and text mining.
+# VectorSource(tweets): This vector is then used as the source for the corpus, whereby each entry in the vector becomes a separate document in the corpus.
+corpus <- Corpus(VectorSource(tweets$full_text))
+```
+
+
+```{r}
+#Replace special characters with blank space, if there are any using gsub
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+corpus <- tm_map(corpus, toSpace, "/")
+corpus <- tm_map(corpus, toSpace, "@")
+corpus <- tm_map(corpus, toSpace, "\\|")
+```
+```{r}
+# Convert the text to lower case
+corpus <- tm_map(corpus, content_transformer(tolower))
+# Remove punctuations
+corpus <- tm_map(corpus, removePunctuation)
+# Eliminate extra white spaces
+corpus <- tm_map(corpus, stripWhitespace)
+# Text stemming (remove suffixes, etc.; only root form of the word)
+#corpus <- tm_map(corpus, stemDocument) #doesn't work that nicely
+```
+
 
 ```{r}
 # Code to identify and possibly filter out retweets and automated tweets
