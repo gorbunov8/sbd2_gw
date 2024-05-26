@@ -19,7 +19,7 @@ We use several libraries to process the tasks and get the output that is asked.
 
 ```{r library, include=FALSE}
 # Load packages and libraries, if not already available.
-libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC")
+libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC", "text", "remotes")
 
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
@@ -94,6 +94,51 @@ summary(tweets)
 ```
 
 
+```{r}
+# Count the frequency of each language
+lang_counts <- table(tweets$lang)
+
+# Sort the language frequencies in descending order
+sort(lang_counts, decreasing = TRUE)
+```
+
+
+
+```{r}
+# Filter the DataFrame to keep only tweets in German, Italian, French and English
+filtered_tweets <- tweets[tweets$lang %in% c("de", "it", "fr", "en"), ]
+
+# Check the resulting language distribution
+table(filtered_tweets$lang)
+```
+
+```{r}
+summary(filtered_tweets)
+```
+
+
+```{r}
+# Install the emo package from GitHub
+if (!require("emo")) {
+  remotes::install_github("hadley/emo")
+}
+library(emo)
+```
+
+```{r}
+table(ji_detect(filtered_tweets$full_text))
+
+# Example for replacing emojis with "[EMOJI]"
+filtered_tweets$clean_text <- sapply(filtered_tweets$full_text, function(text) {
+  ji_replace_all(text, replacement = "[EMOJI]")
+})
+
+# Extract emojis first
+filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
+
+# Display some results
+head(filtered_tweets$emojis)
+```
 
 
 
@@ -102,27 +147,57 @@ summary(tweets)
 ```{r}
 # Corpus: Collection of text documents that generally serves as a basis for analysis in text processing and text mining.
 # VectorSource(tweets): This vector is then used as the source for the corpus, whereby each entry in the vector becomes a separate document in the corpus.
-corpus <- Corpus(VectorSource(tweets$full_text))
+# It is important that the text is extracted, as the corpus should only work with text data.
+corpus <- Corpus(VectorSource(filtered_tweets$full_text))
 ```
 
 
 ```{r}
-#Replace special characters with blank space, if there are any using gsub
-toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
-corpus <- tm_map(corpus, toSpace, "/")
-corpus <- tm_map(corpus, toSpace, "@")
-corpus <- tm_map(corpus, toSpace, "\\|")
+
+# Clean text
+corpus <- tm_map(corpus, content_transformer(tolower))  # Convert to lower case
+corpus <- tm_map(corpus, removePunctuation)             # Removing punctuation marks
+corpus <- tm_map(corpus, removeNumbers)                 # Removing numbers
+corpus <- tm_map(corpus, removeWords, stopwords("german"))  # Removing stop words
+corpus <- tm_map(corpus, stripWhitespace)               # Removal of additional spaces
+
+# Creation of a document term matrix
+dtm <- DocumentTermMatrix(corpus)
+
+# check how many documents have actually been processed
+dim(dtm)
 ```
+
+
+
 ```{r}
-# Convert the text to lower case
-corpus <- tm_map(corpus, content_transformer(tolower))
-# Remove punctuations
-corpus <- tm_map(corpus, removePunctuation)
-# Eliminate extra white spaces
-corpus <- tm_map(corpus, stripWhitespace)
-# Text stemming (remove suffixes, etc.; only root form of the word)
-#corpus <- tm_map(corpus, stemDocument) #doesn't work that nicely
+# Check the term frequencies
+findFreqTerms(dtm, lowfreq = 500)  # Shows terms that occur at least 500 times
 ```
+
+
+
+
+
+
+
+
+```{r}
+# Analyse der häufigsten Wörter
+word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
+head(word_freq, n =1)
+```
+
+
+```{r}
+# Beispiel: Erstellung eines Balkendiagramms der häufigsten Wörter
+word_data <- data.frame(Word = names(word_freq), Frequency = unname(word_freq))
+ggplot(word_data[1:10, ], aes(x = reorder(Word, -Frequency), y = Frequency)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Top 10 häufigste Wörter", x = "Wörter", y = "Häufigkeit")
+```
+
 
 
 ```{r}
