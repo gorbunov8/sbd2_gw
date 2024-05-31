@@ -85,7 +85,16 @@ The dataset consists 19'575 observations and 14 variables:
 **Content Analysis**
 <br>
 
-- The full_text of tweets offers a rich source for content analysis to understand what topics are being discussed
+The word cloud represents the most frequently used words in the filtered tweets with high engagement (likes or retweets). Key observations include:
+
+Frequent Terms: Larger words such as "bachelor," "design," "die," "das," "der," and "amp" indicate their higher occurrence.
+Key Topics:
+"bachelor" for Bachelor's programs or graduates.
+"design" related to design courses or projects.
+"HSLU" (Hochschule Luzern).
+General terms: "schweiz," "zeigen," "nicht."
+Note: The term "amp" appears due to HTML encoding and is not meaningful.
+
 
 <br>
 ```{r}
@@ -152,16 +161,41 @@ tweets %>%
 ### Content Analysis
 
 ```{r}
-# Text mining to find common themes or words
-corpus <- Corpus(VectorSource(tweets$full_text))
+### Content Analysis
+
+# Set a threshold for "high engagement" (e.g., tweets with at least 10 likes or retweets)
+engagement_threshold <- 10
+
+# Filter tweets based on this engagement threshold
+high_engagement_tweets <- tweets %>%
+  filter(favorite_count >= engagement_threshold | retweet_count >= engagement_threshold)
+
+# Rebuild the corpus with the sampled data
+corpus <- Corpus(VectorSource(tweets_sample$full_text))
 corpus <- tm_map(corpus, content_transformer(tolower))
 corpus <- tm_map(corpus, removePunctuation)
 corpus <- tm_map(corpus, removeNumbers)
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
-dtm <- DocumentTermMatrix(corpus)
-word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
-wordcloud(names(word_freq), word_freq, max.words = 100)
 
+# Create DTM and remove sparse terms
+dtm <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
+dtm <- removeSparseTerms(dtm, sparse = 0.99)  # Adjust sparsity threshold as needed
+
+# Ensure word names are captured
+word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
+top_word_freq <- head(word_freq, 25)
+word_names <- colnames(dtm)
+
+# Generate word cloud using the correct word names
+wordcloud(
+  words = word_names, 
+  freq = top_word_freq, 
+  max.words = 25,
+  scale = c(4, 0.5),       # Control for size of the most and least frequent words
+  random.order = FALSE,    # Higher frequency words appear first
+  rot.per = 0.25,          # Allows some rotation for fitting
+  colors = brewer.pal(8, "Dark2")  # Enhances visual appeal
+)
 ```
 
 
