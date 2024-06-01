@@ -19,7 +19,7 @@ We use several libraries to process the tasks and get the output that is asked.
 
 ```{r library, include=FALSE}
 # Load packages and libraries, if not already available.
-libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC", "text", "remotes")
+libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC", "text", "remotes", "plotly")
 
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
@@ -30,7 +30,6 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
 ```
 
 ```{r data, include=FALSE}
@@ -99,10 +98,20 @@ Note: The term "amp" appears due to HTML encoding and is not meaningful.
 
 <br>
 ```{r}
+# Display first six rows of 'tweets'
 head(tweets)
+
+# Provide summary statistics
 summary(tweets)
 ```
 
+## Data Manipulation
+
+### Languages
+
+Here we calculate the frequency of each language present in the tweets dataset and sorts these frequencies in descending order. 
+<br>
+The output indicates that German (de) is the most common language with 14,474 occurrences, followed by Italian (it) with 1,865 and French (fr) with 1,792. English (en) comes next with 1,280 tweets. The frequencies of other languages, including rare and less commonly used ones, are also listed, showcasing the linguistic diversity in the dataset.
 
 ```{r}
 # Count the frequency of each language
@@ -112,7 +121,8 @@ lang_counts <- table(tweets$lang)
 sort(lang_counts, decreasing = TRUE)
 ```
 
-
+<br>
+Due to the fact that German, Italian, French and English are the most frequently listed languages and other languages are not used in large numbers and are not among the most spoken languages in Switzerland, we limit the data set to the 4 most important ones.
 
 ```{r}
 # Filter the DataFrame to keep only tweets in German, Italian, French and English
@@ -121,14 +131,30 @@ filtered_tweets <- tweets[tweets$lang %in% c("de", "it", "fr", "en"), ]
 # Check the resulting language distribution
 table(filtered_tweets$lang)
 ```
+<br>
+
+This gives us the new Summeray of the data set:
+<br>
+
+- **Number of Records:** The total count of tweets has decreased from 19,575 to 19,411, indicating some tweets have been removed or filtered out.
+- **Date and Time:** Minimal changes are reflected across the median and mean values.
+- **Other Attributes:** No significant changes are observed in the ranges.
 
 ```{r}
+# Provide summary statistics
 summary(filtered_tweets)
 ```
 
+### Emojis
+
+**Installing and Loading the emo Package:**
+<br>
+The package `emo` is used for emoji analysis in R, which is essential for text data that includes emojis. This is useful for cleaning data, extracting information, or preparing text for further analysis.
+<br>
+Understanding the prevalence of emojis can help analyze sentiment, user engagement, or cultural trends in social media data.
 
 ```{r}
-# Install the emo package from GitHub
+# Install the emo package from GitHub for Emoji analyzes
 if (!require("emo")) {
   remotes::install_github("hadley/emo")
 }
@@ -136,6 +162,7 @@ library(emo)
 ```
 
 ```{r}
+# check for the presence of any emojis and tabulates the results.
 table(ji_detect(filtered_tweets$full_text))
 
 # Example for replacing emojis with "[EMOJI]"
@@ -145,9 +172,6 @@ filtered_tweets$clean_text <- sapply(filtered_tweets$full_text, function(text) {
 
 # Extract emojis first
 filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
-
-# Display some results
-head(filtered_tweets$emojis)
 ```
 
 
@@ -169,36 +193,94 @@ corpus <- tm_map(corpus, content_transformer(tolower))  # Convert to lower case
 corpus <- tm_map(corpus, removePunctuation)             # Removing punctuation marks
 corpus <- tm_map(corpus, removeNumbers)                 # Removing numbers
 corpus <- tm_map(corpus, removeWords, stopwords("german"))  # Removing stop words
+corpus <- tm_map(corpus, removeWords, stopwords("french"))
+corpus <- tm_map(corpus, removeWords, stopwords("italian"))
+corpus <- tm_map(corpus, removeWords, stopwords("english"))
 corpus <- tm_map(corpus, stripWhitespace)               # Removal of additional spaces
 
-# Creation of a document term matrix
-dtm <- DocumentTermMatrix(corpus)
-
-# check how many documents have actually been processed
-dim(dtm)
+# Create DTM and remove sparse terms
+dtm1 <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
+dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as needed
 ```
 
-
-
-```{r}
-# Check the term frequencies
-findFreqTerms(dtm, lowfreq = 500)  # Shows terms that occur at least 500 times
-```
 
 
 ### Tweet Frequency Analysis
 
 ```{r}
+# Check the term frequencies
+findFreqTerms(dtm1, lowfreq = 500)  # Shows terms that occur at least 500 times
+```
+
+
+```{r, fig.width=15, fig.height=10}
+# Ensure word names are captured
+word_freq1 <- sort(rowSums(as.matrix(dtm1)), decreasing = TRUE)
+top_word_freq1 <- head(word_freq1, 25)
+word_names1 <- colnames(dtm1)
+
+# Generate word cloud using the correct word names
+wordcloud(
+  words = word_names1, 
+  freq = top_word_freq1, 
+  max.words = 25,
+  scale = c(4, 0.5),       # Control for size of the most and least frequent words
+  random.order = FALSE,    # Higher frequency words appear first
+  rot.per = 0.25,          # Allows some rotation for fitting
+  colors = brewer.pal(8, "Dark2")  # Enhances visual appeal
+)
+```
+
+
+
+```{r, fig.width=15, fig.height=10}
 # Code to analyze tweet frequencies by time and university
-tweets %>%
+filtered_tweets %>%
   mutate(tweet_month = floor_date(created_at, "month")) %>%
   group_by(university, tweet_month) %>%
   summarize(count = n(), .groups = 'drop') %>%
   ggplot(aes(x = tweet_month, y = count, fill = university)) +
   geom_col(position = "dodge") +
   theme_minimal() +
-  labs(title = "Monthly Tweet Frequency by University", x = "Month", y = "Number of Tweets")
+  labs(title = "Monthly Tweet Frequency by University", x = "Year", y = "Number of Tweets")
+````
+
+
+
+
+```{r, fig.width=15, fig.height=10}
+# Code um Tweet-Frequenzen nach Zeit und Universität zu analysieren
+# Fokus nur auf BFH
+bfh_tweets <- filtered_tweets %>%
+  filter(university == "bfh") %>%  # Filter um nur BFH zu berücksichtigen
+  mutate(tweet_month = floor_date(created_at, "month")) %>%
+  group_by(tweet_month) %>%
+  summarize(count = n(), .groups = 'drop')
+
+# Verwendung von scale_fill_gradient() für einen Farbverlauf
+ggplot(bfh_tweets, aes(x = tweet_month, y = count, fill = count)) +
+  geom_col() +
+  scale_fill_gradient(low = "lightblue", high = "blue") +
+  theme_minimal() +
+  labs(title = "Monthly Tweet Frequency for BFH", x = "Year", y = "Number of Tweets")
 ```
+
+```{r, fig.width=15, fig.height=10}
+# Angenommen, es gibt spezielle Ereignisse im Mai jedes Jahres
+bfh_tweets$event <- ifelse(format(as.Date(bfh_tweets$tweet_month), "%m") == "05", "Event", "Normal")
+
+# Visualisierung mit spezieller Farbgebung für Ereignisse
+ggplot(bfh_tweets, aes(x = tweet_month, y = count, fill = event)) +
+  geom_col(show.legend = TRUE) +
+  scale_fill_manual(values = c("Event" = "red", "Normal" = "gray")) +
+  theme_minimal() +
+  labs(title = "Monthly Tweet Frequency for BFH", x = "Year", y = "Number of Tweets")
+
+```
+
+
+
+
 ### Content Analysis
 
 ```{r}
@@ -208,15 +290,23 @@ tweets %>%
 engagement_threshold <- 10
 
 # Filter tweets based on this engagement threshold
-high_engagement_tweets <- tweets %>%
+#high_engagement_tweets <- tweets %>%
+#  filter(favorite_count >= engagement_threshold | retweet_count >= engagement_threshold)
+high_engagement_tweets <- filtered_tweets %>%
   filter(favorite_count >= engagement_threshold | retweet_count >= engagement_threshold)
 
+
 # Rebuild the corpus with the sampled data
-corpus <- Corpus(VectorSource(tweets_sample$full_text))
+#corpus <- Corpus(VectorSource(tweets_sample$full_text)) 
+corpus <- Corpus(VectorSource(filtered_tweets$clean_text)) 
 corpus <- tm_map(corpus, content_transformer(tolower))
 corpus <- tm_map(corpus, removePunctuation)
 corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removeWords, stopwords("german"))  # Removing stop words
+corpus <- tm_map(corpus, removeWords, stopwords("french"))
+corpus <- tm_map(corpus, removeWords, stopwords("italian"))
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
+
 
 # Create DTM and remove sparse terms
 dtm <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
@@ -244,7 +334,7 @@ wordcloud(
 
 ```{r}
 # Analysis of likes and retweets
-tweets %>%
+filtered_tweets %>%
   group_by(university) %>%
   summarize(total_likes = sum(favorite_count), total_retweets = sum(retweet_count), .groups = 'drop') %>%
   ggplot(aes(x = reorder(university, total_likes), y = total_likes)) +
