@@ -30,6 +30,7 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 ```{r data, include=FALSE}
@@ -148,7 +149,7 @@ head(filtered_tweets$emojis)
 # Corpus: Collection of text documents that generally serves as a basis for analysis in text processing and text mining.
 # VectorSource(tweets): This vector is then used as the source for the corpus, whereby each entry in the vector becomes a separate document in the corpus.
 # It is important that the text is extracted, as the corpus should only work with text data.
-corpus <- Corpus(VectorSource(filtered_tweets$full_text))
+corpus <- Corpus(VectorSource(filtered_tweets$clean_text))
 ```
 
 
@@ -175,41 +176,6 @@ dim(dtm)
 findFreqTerms(dtm, lowfreq = 500)  # Shows terms that occur at least 500 times
 ```
 
-
-
-
-
-
-
-
-```{r}
-# Analyse der häufigsten Wörter
-word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
-head(word_freq, n =1)
-```
-
-
-```{r}
-# Beispiel: Erstellung eines Balkendiagramms der häufigsten Wörter
-word_data <- data.frame(Word = names(word_freq), Frequency = unname(word_freq))
-ggplot(word_data[1:10, ], aes(x = reorder(Word, -Frequency), y = Frequency)) +
-  geom_bar(stat = "identity") +
-  theme_minimal() +
-  labs(title = "Top 10 häufigste Wörter", x = "Wörter", y = "Häufigkeit")
-```
-
-
-
-```{r}
-# Code to identify and possibly filter out retweets and automated tweets
-tweets <- tweets %>%
-  filter(!is.na(full_text))  # Ensures only tweets with text are analyzed
-```
-
-
-```{r}
-summary(tweets)
-```
 
 ### Tweet Frequency Analysis
 
