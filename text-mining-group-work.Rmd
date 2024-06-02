@@ -40,7 +40,7 @@ lapply(libraries, library, quietly = TRUE, character.only = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r data, include=FALSE}
+```{r data, echo=TRUE}
 # Load data set and make a copy of the original
 set.seed(123)
 options(scipen=999)
@@ -197,6 +197,7 @@ In this section we will analyze the tweets tweets for frequency of Swiss univers
 
 Each histogram shows fluctuations in tweet volumes over the years
 <br>
+
 - **Universities like HSLU and ZHAW:** Display prominent peaks at certain intervals, possibly indicating targeted social media campaigns or significant events that engaged the university community.
 - **Other Universities (e.g., BFH, FHNW):** Some show a steady level of activity with occasional spikes, while others might exhibit a decline or increase in activity, suggesting changes in social media strategy or external factors impacting engagement.
 
@@ -289,7 +290,7 @@ dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as n
 
 <br>
 
-**Analyze Terms:**
+**Terms Analysis:**
 <br>
 
 - **Dominant Themes:** Words like "schweizer" (Swiss), "unternehmen" (companies), "zukunft" (future), "innov" (innovation), and "digital" suggest that the text data heavily revolves around themes of Swiss companies, innovation, and digital advancements.
@@ -456,7 +457,7 @@ high_engagement_tweets %>%
 ```
 
 
-### HSLU & ZHAW Engagement Analysis
+## HSLU & ZHAW Engagement Analysis
 
 In this area, we will analyze the universities HSLU (Lucerne University of Applied Sciences and Arts) and ZHAW (Zurich University of Applied Sciences) to find out why they have significantly more interactions compared to other universities.
 <br>
@@ -517,9 +518,10 @@ dtm2 <- removeSparseTerms(dtm2, sparse = 0.99)  # Adjust sparsity threshold as n
 The word cloud illustrates which topics are most engaging within the parameter for at least 10 likes or retweets.
 <br>
 
-- **Topic Relevance:** The engagement could be driven by the relevance of the topics discussed, such as climate goals and economic studies, which are significant areas of interest globally.
-- *"Content Quality:"* The use of terms like "studie" and "beitrag" suggests high-quality content that offers value through educational insights or research findings, which is typically well-received in academic communities.
-- **Clear and Actionable Messages:** The presence of terms related to achievements and actions indicates that clear, actionable content tends to perform well, as it likely inspires and motivates the audience.
+- **Educational Focus:** Words like "studierend" (students), "student", and "studi" (study) emphasize the educational aspect, indicating discussions about student experiences and academic programs.
+- **Institutional Identity:** "ZHAW" appears prominently, underscoring the content's focus on this specific university.
+- **Youth and Engagement:** Terms like "neuer" (new), "jung" (young), and "join" suggest a focus on engaging new or prospective students and youth-oriented initiatives.
+- **Current and Relevant:** Words such as "neu" (new), "aktuell" (current), and "beitrag" (contribution) indicate timely and relevant content, likely discussing recent developments or contributions in academia.
 
 
 ```{r warning=FALSE}
@@ -546,9 +548,12 @@ wordcloud(
 **Most Frequent Emojis:**
 <br>
 
-- **Guidance and Clarity:** Directional emojis like 👉 and ➡️ are crucial in navigating users through content effectively
-- **Thematic Relevance:** Emojis related to specific themes (e.g., 🌍 for global issues, 💻 for technology) help in visually categorizing the content
-- **Emotional Connection:** Emojis that convey emotions or actions (e.g., 💛, 💬) can humanize the content
+- **National Identity and Direction:** The Swiss flag 🇨🇭 and directional emojis like 👉 and ➡️ might suggest content targeting a Swiss audience or guiding viewers towards important information.
+- **Celebrations and Positive Emotions:** Emojis like 🎉, 🍾, ✨, and 🥳 depict celebration and festive occasions, indicating content that likely celebrates achievements, events, or holidays.
+- **Nature and Seasonal Changes:** Nature-related emojis 🌼, 🌞, 🌳, and 🌸 suggest topics around seasons, environmental awareness, or activities, enhancing the visual appeal and relatability of posts.
+- **Social Interaction and Communication:** Emojis like 👋, 💛, 💬, and 📢 indicate a strong focus on communication, engagement, and spreading messages, aiming to foster interaction and dialogue.
+- **Technology and Progress:** The use of 💻, 📈, and 📺 points to content related to technology, media, and data analysis or trends, appealing to an audience interested in tech and development.
+- **Food and Lifestyle:** Food-related emojis 🥑, 🥗 show content that might relate to health, diet, or lifestyle, aligning with interests in well-being and nutrition.
 
 ```{r}
 # Analyze the frequency of different emojis
@@ -557,7 +562,7 @@ sort(emoji_freq, decreasing = TRUE)
 ```
 
 
-### BFH Frequency Analysis
+## BFH Frequency Analysis
 
 In this section, we will analyze BFH (Bern University of Applied Sciences) to find out what tweets they usually use the most.
 <br>
