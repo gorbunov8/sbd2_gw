@@ -1,6 +1,6 @@
 ---
-title: "text-mining-group-work"
-author: "Vladyslav Gorbunov, Larissa Pagliarin"
+title: "Text Mining Group Work"
+author: "Group 9"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
@@ -9,6 +9,8 @@ output:
     toc: true
     toc_float: true
 ---
+
+
 
 ## Data Import and Preparation
 
@@ -175,8 +177,9 @@ filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
 ```
 
 
-
 ## Tweet Analysis
+
+## Tweet Frequency Analysis
 
 In this section we will analyze the tweets of Swiss universities.
 
@@ -212,7 +215,7 @@ interactive_plot
 ```
 
 
-### Tweet Frequency of Terms
+### Tweet Frequency - Terms
 
 Here we returns terms that meet the high frequency threshold. 
 <br>
@@ -308,15 +311,11 @@ wordcloud(
 )
 ```
 
-### Emoji Frequency in Tweets
+### Tweets Frequency - Emojis 
 
-**Top Emojis:**
-<br>
-
-- ➡️ (414) and ⤵️ (247): These arrows could be used to direct attention to links, resources, or to continue reading more content, suggesting active engagement strategies in tweets.
-- 👉 (180): Often used to point towards a link or an important aspect, reinforcing the directional use of emojis to highlight specific content.
-- 📖 (117): Likely symbolizes reading or educational content, which is apt for universities sharing academic resources or promoting courses.
-- 🔎 (97): Represents searching or exploring, possibly used in contexts of research, inquiry, or to emphasize the exploration of new ideas.
+- **Engagement Strategy:** The frequent use of directional emojis like ➡️, ⤵️, and 👉 suggests that guiding readers to additional content or important links is a successful strategy.
+- **Content Themes:** Emojis like 📖, 🔎, 💻, and 💡 highlight the focus on education, research, and technology. 
+- **Celebratory Communication:** Emojis such as 👏, 🎉, 🎓, and 🥳 signify celebration and achievement. 
 
 ```{r}
 # Analyze the frequency of different emojis and select the top 50
@@ -324,10 +323,14 @@ emoji_freq <- table(unlist(filtered_tweets$emojis))
 sort(emoji_freq, decreasing = TRUE)[1:50]
 ```
 
+## High Engagement
 
+In this section, we want to focus on tweets that have attracted more attention and interaction.
 
-### High Engagement
+### High Engagement - Terms
 
+**Text Preprocessing:**
+<br>
 
 This section sets a variable `engagement_threshold` to 20, which is used as the minimum number of likes or retweets a tweet must have to be considered as having "high engagement". This threshold helps to focus on tweets that have garnered more attention and interaction.
 
@@ -379,6 +382,9 @@ dtm <- removeSparseTerms(dtm, sparse = 0.99)  # Adjust sparsity threshold as nee
 
 <br>
 
+**Text Analyse:**
+<br>
+
 The word cloud effectively illustrates which topics are most engaging within the parameter for at least 20 likes or retweets. This visualization can help in refining the communication and engagement strategies by focusing on the topics that naturally engage your audience.
 <br>
 
@@ -411,14 +417,21 @@ wordcloud(
 ```
 
 
+### High Engagement - Emojis
+
+**Most Frequent Emojis:**
+<br>
+
+- **Utility and Guidance:** Directional emojis like ➡️ and 👉 suggest that providing clear guidance or calls to action within tweets is effective in garnering engagement.
+- **Cultural and International Appeal:** The presence of multiple national flags suggests that tweets connected to specific national contexts or international discussions. 
+- **Emotional and Informative Content:** Emojis like ✨ (sparkles) and 💛 (heart) are often used to add emotional depth or positivity to tweets. Similarly, 📅 (calendar) and 📢 (megaphone) likely denote event-related or important announcements that command attention.
+
+
 ```{r}
 # Analyze the frequency of different emojis
 emoji_freq1 <- table(unlist(high_engagement_tweets$emojis))
 sort(emoji_freq1, decreasing = TRUE)
 ```
-
-
-
 
 
 ### Engagement Analysis by University
@@ -442,7 +455,14 @@ high_engagement_tweets %>%
 
 ### HSLU & ZHAW Engagement Analysis
 
+In this area, we will analyze the universities HSLU (Lucerne University of Applied Sciences and Arts) and ZHAW (Zurich University of Applied Sciences) to find out why they have significantly more interactions compared to other universities.
+<br>
+<br>
 
+**Text Preprocessing:**
+<br>
+
+For this we must again take text prepossessing measures, as in the previous analyses
 
 ```{r}
 #Filter Tweets for HSLU and ZHAW
@@ -486,6 +506,18 @@ dtm2 <- DocumentTermMatrix(corpus3, control = list(removePunctuation = TRUE, sto
 dtm2 <- removeSparseTerms(dtm2, sparse = 0.99)  # Adjust sparsity threshold as needed
 ```
 
+<br>
+
+**Text Analyse:**
+<br>
+
+The word cloud illustrates which topics are most engaging within the parameter for at least 20 likes or retweets.
+<br>
+
+- **Topic Relevance:** The engagement could be driven by the relevance of the topics discussed, such as climate goals and economic studies, which are significant areas of interest globally.
+- *"Content Quality:"* The use of terms like "studie" and "beitrag" suggests high-quality content that offers value through educational insights or research findings, which is typically well-received in academic communities.
+- **Clear and Actionable Messages:** The presence of terms related to achievements and actions indicates that clear, actionable content tends to perform well, as it likely inspires and motivates the audience.
+
 
 ```{r warning=FALSE}
 set.seed(123)
@@ -506,7 +538,14 @@ wordcloud(
 )
 ```
 
+<br>
 
+**Most Frequent Emojis:**
+<br>
+
+- **Guidance and Clarity:** Directional emojis like 👉 and ➡️ are crucial in navigating users through content effectively
+- **Thematic Relevance:** Emojis related to specific themes (e.g., 🌍 for global issues, 💻 for technology) help in visually categorizing the content
+- **Emotional Connection:** Emojis that convey emotions or actions (e.g., 💛, 💬) can humanize the content
 
 ```{r}
 # Analyze the frequency of different emojis
