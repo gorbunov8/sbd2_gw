@@ -12,7 +12,13 @@ output:
 
 
 
-## Data Import and Preparation
+
+
+# Data Import & Analysis
+
+In this area, we will load and analyze the data for the work in order to make decisions on how to proceed.
+
+## Data Import
 
 We Import the dataset *SP500_data.csv* and make a copy to work with it and named it *data*. We copy it so we can be secure that i do not make any changes in the original dataset.
 <br>
@@ -110,6 +116,8 @@ summary(tweets)
 
 ## Data Manipulation
 
+In this area we will prepare the data for analysis.
+
 ### Languages
 
 Here we calculate the frequency of each language present in the tweets dataset and sorts these frequencies in descending order. 
@@ -177,11 +185,13 @@ filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
 ```
 
 
-## Tweet Analysis
+# Tweet Analysis
+
+In this section we will use the prepared data to analyze the tweets for frequency, interactions and universities.
 
 ## Tweet Frequency Analysis
 
-In this section we will analyze the tweets of Swiss universities.
+In this section we will analyze the tweets tweets for frequency of Swiss universities.
 
 ### Tweet Frequency over Time
 
@@ -282,15 +292,8 @@ dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as n
 **Analyze Terms:**
 <br>
 
-- Words like "innov" (innovation), "entwickelt" (developed), and "neuen" (new) indicate a strong emphasis on innovation, research, and development within the academic or professional discussions.
-- "Zukunft" (future) and "digital" further emphasize the forward-looking and technology-oriented nature of the discourse.
-- Specific references to institutions like "FHNW" (University of Applied Sciences and Arts Northwestern Switzerland) and "BFH" (Bern University of Applied Sciences) highlight the involvement or activities of these entities.
-- "Schweizer" (Swiss) suggests a national context, likely focusing on Swiss education or research initiatives.
-- "dank" (thanks) and "zeigt" (shows) could imply a tone of gratitude or showcasing achievements, projects, or important information.
-- "info" and "arbeit" (work) suggest that these tweets might include informative content about work or studies.
-- "emoji" hints at the use of digital expressions to convey emotions more effectively within tweets.
-- "gespräch" (conversation) and "gemeinsam" (together) emphasize communication and collaboration.
-- "heut" (today), "uhr" (hour/time), and "jahr" (year) indicate time-specific references, possibly relating to events, deadlines, or anniversaries.
+- **Dominant Themes:** Words like "schweizer" (Swiss), "unternehmen" (companies), "zukunft" (future), "innov" (innovation), and "digital" suggest that the text data heavily revolves around themes of Swiss companies, innovation, and digital advancements.
+- **Common Words:** Frequent appearance of terms like "dank" (thanks), "neue" (new), "mehr" (more), and "info" indicate common communication patterns possibly related to news dissemination or updates about new developments and initiatives.
 
 ```{r warning=FALSE}
 set.seed(123)
@@ -319,8 +322,8 @@ wordcloud(
 
 ```{r}
 # Analyze the frequency of different emojis and select the top 50
-emoji_freq <- table(unlist(filtered_tweets$emojis))
-sort(emoji_freq, decreasing = TRUE)[1:50]
+emoji_freq2 <- table(unlist(filtered_tweets$emojis))
+sort(emoji_freq2, decreasing = TRUE)[1:50]
 ```
 
 ## High Engagement
@@ -467,7 +470,7 @@ For this we must again take text prepossessing measures, as in the previous anal
 ```{r}
 #Filter Tweets for HSLU and ZHAW
 hslu_zhaw_tweets <- filtered_tweets %>%
-  filter(university %in% c("HSLU", "ZHAW"))
+  filter(university %in% c("hslu", "ZHAW"))
 
 # Set a threshold for "high engagement" (e.g., tweets with at least 10 likes or retweets)
 engagement_threshold1 <- 10
@@ -511,7 +514,7 @@ dtm2 <- removeSparseTerms(dtm2, sparse = 0.99)  # Adjust sparsity threshold as n
 **Text Analyse:**
 <br>
 
-The word cloud illustrates which topics are most engaging within the parameter for at least 20 likes or retweets.
+The word cloud illustrates which topics are most engaging within the parameter for at least 10 likes or retweets.
 <br>
 
 - **Topic Relevance:** The engagement could be driven by the relevance of the topics discussed, such as climate goals and economic studies, which are significant areas of interest globally.
@@ -551,6 +554,104 @@ wordcloud(
 # Analyze the frequency of different emojis
 emoji_freq <- table(unlist(hslu_zhaw_high_engagement_tweets$emojis))
 sort(emoji_freq, decreasing = TRUE)
+```
+
+
+### BFH Frequency Analysis
+
+In this section, we will analyze BFH (Bern University of Applied Sciences) to find out what tweets they usually use the most.
+<br>
+<br>
+
+**Text Preprocessing:**
+<br>
+
+For this we must again take text prepossessing measures, as in the previous analyses.
+
+```{r}
+#Filter Tweets for HSLU and ZHAW
+bfh_tweets <- filtered_tweets %>%
+  filter(university %in% "bfh")
+
+# Rebuild the corpus with the sampled data
+corpus4 <- Corpus(VectorSource(bfh_tweets$clean_text)) 
+
+corpus4 <- tm_map(corpus4, content_transformer(tolower))  # Convert to lower case
+corpus4 <- tm_map(corpus4, removePunctuation)             # Removing punctuation marks
+corpus4 <- tm_map(corpus4, removeNumbers)                 # Removing numbers
+corpus4 <- tm_map(corpus4, removeWords, stopwords("german"))  # Removing stop words
+corpus4 <- tm_map(corpus4, removeWords, stopwords("french"))
+corpus4 <- tm_map(corpus4, removeWords, stopwords("italian"))
+corpus4 <- tm_map(corpus4, removeWords, stopwords("english"))
+corpus4 <- tm_map(corpus4, stripWhitespace)               # Removal of additional spaces
+corpus4 <- tm_map(corpus4, stemDocument) #remove suffixes, etc.; only root form of the word
+
+# Further clean the text by removing specific web/text symbols and terms
+corpus4 <- tm_map(corpus4, content_transformer(function(x) {
+  x <- gsub("–", "", x)
+  x <- gsub("…", "", x) 
+  x <- gsub("«", "", x) 
+  x <- gsub("»", "", x) 
+  x <- gsub("\\b(rt|www|emojiemoji)\\b", "", x, ignore.case = TRUE)  # Remove 'rt', 'www', and 'emojiemoji'
+  x <- gsub("amp", "", x, ignore.case = TRUE)  # Remove 'amp' from HTML encoded '&'
+  x <- gsub("http[s]?://\\S+", "", x)  # Remove URLs
+  return(x)
+}))
+
+# Create DTM and remove sparse terms
+dtm3 <- DocumentTermMatrix(corpus4, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
+dtm3 <- removeSparseTerms(dtm3, sparse = 0.99)  # Adjust sparsity threshold as needed
+```
+
+<br>
+
+**Text Analyse:**
+<br>
+
+The word cloud illustrates which topics have the highest frequency.
+<br>
+
+- **Practical and Innovative Focus:** Terms like "Praxis" (practice) and "Innov" (innovation) indicate a strong link between academic content and real-world applications, appealing particularly to an audience interested in actionable and cutting-edge information.
+- "*Community and Collaboration:"* Words such as "zusammen" (together) and "unsere" (our) reflect a community-focused approach, promoting collective efforts and teamwork within the university setting.
+- **Local Identity and Quality:** The mention of "Schweizer" (Swiss) suggests content with a national focus, likely resonating with local pride, while "Qualität" (quality) underscores the university’s commitment to high standards in education and research.
+
+
+```{r warning=FALSE}
+set.seed(123)
+# Ensure word names are captured
+word_freq3 <- sort(rowSums(as.matrix(dtm3)), decreasing = TRUE)
+top_word_freq3 <- head(word_freq3, 80)
+word_names3 <- colnames(dtm3)
+
+# Generate word cloud using the correct word names
+wordcloud(
+  words = word_names3, 
+  freq = top_word_freq3, 
+  max.words = 80,
+  scale = c(4, 0.5),       # Control for size of the most and least frequent words
+  random.order = FALSE,    # Higher frequency words appear first
+  rot.per = 0.25,          # Allows some rotation for fitting
+  colors = brewer.pal(8, "Dark2")  # Enhances visual appeal
+)
+```
+
+
+
+<br>
+
+**Most Frequent Emojis:**
+<br>
+
+- **Technology and Innovation:** Directional emojis like 👉 and devices such as 💻 and innovations (🔋, 🚀, 🤖) dominate, highlighting content on technological advancements and future trends.
+- **Environmental Themes:** Nature-related emojis (🌴, 🌲, 🌳, ♻️) emphasize environmental issues and sustainability efforts.
+- **Community and Celebrations:** Emojis like 🎉 and 👏 are used for celebrations and achievements, fostering community spirit.
+- **Health and Lifestyle:** Emojis like 🥥, 🥦, and 🥕 suggest a focus on health and nutrition.
+- **Global and Cultural Awareness:** Symbols like 🌐 and 🌍, along with the Swiss flag 🇨🇭, point to global awareness and local identity.
+
+```{r}
+# Analyze the frequency of different emojis
+emoji_freq3 <- table(unlist(bfh_tweets$emojis))
+sort(emoji_freq3, decreasing = TRUE)[1:30]
 ```
 
 
