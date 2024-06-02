@@ -791,12 +791,45 @@ ggplot(best_posting_days2, aes(x = day_of_week, y = count)) +
 ```
 
 
-## Recommendations
+# Recommendations
+
+In this section, we will outline the most important recommendations for action for BFH from the previous analyses, so that they can use these measures to generate an increase in interactions on their Twitter account.
+
+
+## Optimal Terms
+
+- **Focus on digital and innovative topics:** Words like "digital", "digit", "data", and "open" are topics around digitalization and open data initiatives are attracting a lot of interest. 
+
+- **Emphasize sustainability and climate targets:** Terms like "climate goal" and "sustain" show that discussions around sustainability and environmental responsibility resonate. This is partly implemented with sustainability.
+
+- **Use interactive elements:** The use of direct address such as "gespräch" can help increase interactivity and community engagement. 
+
+- **Expand and include the target audience:** Words like "chunivers" (CH universities) suggest that a broader discussion on topics that affect multiple universities will resonate.
+
+<br>
+
+These contributions on these topics should be taken up more by BFH in order to achieve more interactions on the account.
+
+
+## Optimal Emojis 
+
+Emojis such as ➡️ 🇨🇭 💛 😀 😉 should be used more, as these were the most commonly used in terms of high interaction in other universities. The emoji 👉 is already widely used and should continue to be used.
+
+
+## Optimal Posting Times 
+
+Analysis shows that tweets generate the most engagement in the early mornings and late afternoons. It would be advisable to schedule important announcements and content during these times.
+
+
+## Optimal Posting Weekday
+
+Engagement analysis by day of the week shows that from Monday to Thursday engagement is generally higher than on weekends. Tuesday, in particular, is a day that receives the most interactions on the accounts. BFH should consider focusing its main communication on these days and especially on Tuesday.
 
 
 
 
-## Conclusion
+
+# Conclusion
 
 
 
