@@ -516,7 +516,7 @@ hslu_zhaw_tweets <- filtered_tweets %>%
   filter(university %in% c("hslu", "ZHAW"))
 
 # Set a threshold for "high engagement" (e.g., tweets with at least 10 likes or retweets)
-engagement_threshold1 <- 10
+engagement_threshold1 <- 20
 
 # Filter tweets based on this engagement threshold
 hslu_zhaw_high_engagement_tweets <- hslu_zhaw_tweets %>%
@@ -560,10 +560,7 @@ dtm2 <- removeSparseTerms(dtm2, sparse = 0.99)  # Adjust sparsity threshold as n
 The word cloud illustrates which topics are most engaging within the parameter for at least 10 likes or retweets.
 <br>
 
-- **Educational Focus:** Words like "studierend" (students), "student", and "studi" (study) emphasize the educational aspect, indicating discussions about student experiences and academic programs.
-- **Institutional Identity:** "ZHAW" appears prominently, underscoring the content's focus on this specific university.
-- **Youth and Engagement:** Terms like "neuer" (new), "jung" (young), and "join" suggest a focus on engaging new or prospective students and youth-oriented initiatives.
-- **Current and Relevant:** Words such as "neu" (new), "aktuell" (current), and "beitrag" (contribution) indicate timely and relevant content, likely discussing recent developments or contributions in academia.
+- 
 
 
 ```{r warning=FALSE}
@@ -587,12 +584,7 @@ wordcloud(
 
 ### HSLU & ZHAW Engagement - Emojis
 
-- **National Identity and Direction:** The Swiss flag 🇨🇭 and directional emojis like 👉 and ➡️ might suggest content targeting a Swiss audience or guiding viewers towards important information.
-- **Celebrations and Positive Emotions:** Emojis like 🎉, 🍾, ✨, and 🥳 depict celebration and festive occasions, indicating content that likely celebrates achievements, events, or holidays.
-- **Nature and Seasonal Changes:** Nature-related emojis 🌼, 🌞, 🌳, and 🌸 suggest topics around seasons, environmental awareness, or activities, enhancing the visual appeal and relatability of posts.
-- **Social Interaction and Communication:** Emojis like 👋, 💛, 💬, and 📢 indicate a strong focus on communication, engagement, and spreading messages, aiming to foster interaction and dialogue.
-- **Technology and Progress:** The use of 💻, 📈, and 📺 points to content related to technology, media, and data analysis or trends, appealing to an audience interested in tech and development.
-- **Food and Lifestyle:** Food-related emojis 🥑, 🥗 show content that might relate to health, diet, or lifestyle, aligning with interests in well-being and nutrition.
+
 
 ```{r}
 # Analyze the frequency of different emojis
@@ -603,9 +595,7 @@ sort(emoji_freq, decreasing = TRUE)
 
 ### HSLU & ZHAW Engagement - Hours
 
-This graph shows the hourly engagement of tweets for HSLU and ZHAW. 
-<br>
-The highest engagement levels are observed at 10:00 AM and 14:00 (2 PM). There is also notable engagement at 13:00 (1 PM) and 15:00 (3 PM). Engagement significantly drops in the evening, suggesting that these hours might be less effective for reaching the audience.
+
 
 ```{r}
 # Analyze and plot tweet counts by hour to find the best posting times
