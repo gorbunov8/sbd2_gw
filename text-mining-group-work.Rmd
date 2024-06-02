@@ -423,8 +423,6 @@ wordcloud(
 
 ### High Engagement - Emojis
 
-**Most Frequent Emojis:**
-<br>
 
 - **Utility and Guidance:** Directional emojis like ➡️ and 👉 suggest that providing clear guidance or calls to action within tweets is effective in garnering engagement.
 - **Cultural and International Appeal:** The presence of multiple national flags suggests that tweets connected to specific national contexts or international discussions. 
@@ -436,6 +434,10 @@ wordcloud(
 emoji_freq1 <- table(unlist(high_engagement_tweets$emojis))
 sort(emoji_freq1, decreasing = TRUE)
 ```
+
+### High Engagement - Hours
+
+This graph shows tweet engagement by hour, indicating that the peak time for high engagement tweets occurs at 16:00 (4 PM). Engagement appears to be generally higher in the afternoon hours compared to the morning and late evening.
 
 ```{r}
 # Analyze and plot tweet counts by hour to find the best posting times
@@ -451,7 +453,6 @@ ggplot(best_posting_hours1, aes(x = timeofday_hour, y = count)) +
        x = "Hour of the Day",
        y = "Number of High Engagement Tweets") +
   theme_minimal()
-
 ```
 
 
@@ -477,8 +478,8 @@ high_engagement_tweets %>%
 ## HSLU & ZHAW Engagement Analysis
 
 In this area, we will analyze the universities HSLU (Lucerne University of Applied Sciences and Arts) and ZHAW (Zurich University of Applied Sciences) to find out why they have significantly more interactions compared to other universities.
-<br>
-<br>
+
+### HSLU & ZHAW Engagement - Terms
 
 **Text Preprocessing:**
 <br>
@@ -560,10 +561,7 @@ wordcloud(
 )
 ```
 
-<br>
-
-**Most Frequent Emojis:**
-<br>
+### HSLU & ZHAW Engagement - Emojis
 
 - **National Identity and Direction:** The Swiss flag 🇨🇭 and directional emojis like 👉 and ➡️ might suggest content targeting a Swiss audience or guiding viewers towards important information.
 - **Celebrations and Positive Emotions:** Emojis like 🎉, 🍾, ✨, and 🥳 depict celebration and festive occasions, indicating content that likely celebrates achievements, events, or holidays.
@@ -578,6 +576,12 @@ emoji_freq <- table(unlist(hslu_zhaw_high_engagement_tweets$emojis))
 sort(emoji_freq, decreasing = TRUE)
 ```
 
+
+### HSLU & ZHAW Engagement - Hours
+
+This graph shows the hourly engagement of tweets for HSLU and ZHAW. 
+<br>
+The highest engagement levels are observed at 10:00 AM and 14:00 (2 PM). There is also notable engagement at 13:00 (1 PM) and 15:00 (3 PM). Engagement significantly drops in the evening, suggesting that these hours might be less effective for reaching the audience.
 
 ```{r}
 # Analyze and plot tweet counts by hour to find the best posting times
