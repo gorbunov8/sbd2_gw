@@ -11,7 +11,9 @@ output:
 ---
 
 
+# Text Mining Task
 
+In this analysis, we delved into the tweet engagement patterns for Bern University of Applied Sciences (BFH) compared to other Swiss higher education institutions. We utilized various visual and textual data to identify key engagement metrics and content strategies that could optimize BFH's social media performance.
 
 
 # Data Import & Analysis
@@ -826,15 +828,13 @@ Analysis shows that tweets generate the most engagement in the early mornings an
 Engagement analysis by day of the week shows that from Monday to Thursday engagement is generally higher than on weekends. Tuesday, in particular, is a day that receives the most interactions on the accounts. BFH should consider focusing its main communication on these days and especially on Tuesday.
 
 
-
-
-
 # Conclusion
 
-
-
-
-
+Our findings reveal that high engagement for tweets correlates strongly with content focused on digital transformation, sustainability, and institutional activities. Notably, tweets featuring themes of innovation, open data, and environmental initiatives received more engagement, reflecting a broader interest in these areas among the audience.
+<br>
+Furthermore, the timing of posts plays a crucial role in maximizing visibility and interaction. The data indicated specific hours and days where engagement peaked, suggesting optimal times for posting to ensure maximum reach.
+<br>
+By implementing the recommendations, BFH can increase engagement on their social media platforms and maybe also reinforce their position as a forward-thinking and impact educational institution in Switzerland.
 
 
 
