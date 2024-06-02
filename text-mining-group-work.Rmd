@@ -193,7 +193,6 @@ Here we clean the corpus by converting all text to lowercase, removing punctuati
 Cleaning the text is crucial for reducing noise and focusing analyses on meaningful words only. This standardizes the text data, making subsequent analyses like topic modeling or sentiment analysis more effective and less prone to error due to textual inconsistencies.
 
 ```{r}
-
 # Clean text
 corpus <- tm_map(corpus, content_transformer(tolower))  # Convert to lower case
 corpus <- tm_map(corpus, removePunctuation)             # Removing punctuation marks
@@ -203,6 +202,18 @@ corpus <- tm_map(corpus, removeWords, stopwords("french"))
 corpus <- tm_map(corpus, removeWords, stopwords("italian"))
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
 corpus <- tm_map(corpus, stripWhitespace)               # Removal of additional spaces
+corpus <- tm_map(corpus, stemDocument) #remove suffixes, etc.; only root form of the word
+
+# Further clean the text by removing specific web/text symbols and terms
+corpus <- tm_map(corpus, content_transformer(function(x) {
+  x <- gsub("–", "", x)
+  x <- gsub("…", "", x) 
+  x <- gsub("«", "", x) 
+  x <- gsub("rt", "", x, ignore.case = TRUE)  # Remove 'rt' used in retweets
+  x <- gsub("amp", "", x, ignore.case = TRUE)  # Remove 'amp' from HTML encoded '&'
+  x <- gsub("http[s]?://\\S+", "", x)  # Remove URLs
+  return(x)
+}))
 ```
 
 <br>
@@ -214,6 +225,7 @@ Reducing sparsity helps focus on terms that have significant presence across doc
 # Create DTM and remove sparse terms
 dtm1 <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
 dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as needed
+?stopwords
 ```
 
 
@@ -221,23 +233,30 @@ dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as n
 
 ### Frequency
 
+The function returns a vector of terms that meet the specified frequency threshold. In this case, terms such as "schweizer", "bfh", "neuen", "emoji", and others are listed, indicating they are common within the dataset. By setting a high frequency threshold (e.g., 200 occurrences), you can focus on terms that are more relevant across the dataset.
+
 ```{r}
 # Check the term frequencies
-findFreqTerms(dtm1, lowfreq = 500)  # Shows terms that occur at least 500 times
+findFreqTerms(dtm1, lowfreq = 25)  # Shows terms that occur at least 500 times
 ```
 
+<br>
 
-```{r}
+Words like "schweizer" (Swiss), "unternehmen" (companies), "zukunft" (future), "innov" (innovation), and "digital" suggest that the text data heavily revolves around themes of Swiss companies, innovation, and digital advancements.
+<br>
+Frequent appearance of terms like "dank" (thanks), "neue" (new), "mehr" (more), and "info" indicate common communication patterns possibly related to news dissemination or updates about new developments and initiatives.
+
+```{r warning=FALSE}
 # Ensure word names are captured
 word_freq1 <- sort(rowSums(as.matrix(dtm1)), decreasing = TRUE)
-top_word_freq1 <- head(word_freq1, 25)
+top_word_freq1 <- head(word_freq1, 80)
 word_names1 <- colnames(dtm1)
 
 # Generate word cloud using the correct word names
 wordcloud(
   words = word_names1, 
   freq = top_word_freq1, 
-  max.words = 25,
+  max.words = 80,
   scale = c(4, 0.5),       # Control for size of the most and least frequent words
   random.order = FALSE,    # Higher frequency words appear first
   rot.per = 0.25,          # Allows some rotation for fitting
