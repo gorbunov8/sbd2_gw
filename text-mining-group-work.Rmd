@@ -247,6 +247,7 @@ Words like "schweizer" (Swiss), "unternehmen" (companies), "zukunft" (future), "
 Frequent appearance of terms like "dank" (thanks), "neue" (new), "mehr" (more), and "info" indicate common communication patterns possibly related to news dissemination or updates about new developments and initiatives.
 
 ```{r warning=FALSE}
+set.seed(123)
 # Ensure word names are captured
 word_freq1 <- sort(rowSums(as.matrix(dtm1)), decreasing = TRUE)
 top_word_freq1 <- head(word_freq1, 80)
@@ -355,6 +356,7 @@ The word cloud effectively illustrates which topics are most engaging within the
 - Words like "mithilf" (with help) and phrases possibly related to collaboration highlight the community.
 
 ```{r warning=FALSE}
+set.seed(123)
 # Ensure word names are captured
 word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
 top_word_freq <- head(word_freq, 80)
@@ -373,7 +375,17 @@ wordcloud(
 ```
 
 
-### Engagement Analysis
+```{r}
+# Analyze the frequency of different emojis
+emoji_freq1 <- table(unlist(high_engagement_tweets$emojis))
+sort(emoji_freq1, decreasing = TRUE)
+```
+
+
+
+
+
+### Engagement Analysis by University
 
 The bar chart visualizes the total likes accumulated by different universities within the parameter for at least 20 likes or retweets, highlighting variations in engagement across these institutions on social media.
 <br>
@@ -391,6 +403,80 @@ high_engagement_tweets %>%
   labs(title = "Engagement Analysis by University", x = "University", y = "Total Likes")
 ```
 
+
+### HSLU & ZHAW Engagement Analysis
+
+
+
+```{r}
+#Filter Tweets for HSLU and ZHAW
+hslu_zhaw_tweets <- filtered_tweets %>%
+  filter(university %in% c("HSLU", "ZHAW"))
+
+# Set a threshold for "high engagement" (e.g., tweets with at least 10 likes or retweets)
+engagement_threshold1 <- 10
+
+# Filter tweets based on this engagement threshold
+hslu_zhaw_high_engagement_tweets <- hslu_zhaw_tweets %>%
+  filter(favorite_count >= engagement_threshold1 | retweet_count >= engagement_threshold1)
+
+# Rebuild the corpus with the sampled data
+corpus3 <- Corpus(VectorSource(hslu_zhaw_high_engagement_tweets$clean_text)) 
+
+corpus3 <- tm_map(corpus3, content_transformer(tolower))  # Convert to lower case
+corpus3 <- tm_map(corpus3, removePunctuation)             # Removing punctuation marks
+corpus3 <- tm_map(corpus3, removeNumbers)                 # Removing numbers
+corpus3 <- tm_map(corpus3, removeWords, stopwords("german"))  # Removing stop words
+corpus3 <- tm_map(corpus3, removeWords, stopwords("french"))
+corpus3 <- tm_map(corpus3, removeWords, stopwords("italian"))
+corpus3 <- tm_map(corpus3, removeWords, stopwords("english"))
+corpus3 <- tm_map(corpus3, stripWhitespace)               # Removal of additional spaces
+corpus3 <- tm_map(corpus3, stemDocument) #remove suffixes, etc.; only root form of the word
+
+# Further clean the text by removing specific web/text symbols and terms
+corpus3 <- tm_map(corpus3, content_transformer(function(x) {
+  x <- gsub("–", "", x)
+  x <- gsub("…", "", x) 
+  x <- gsub("«", "", x) 
+  x <- gsub("»", "", x) 
+  x <- gsub("\\b(rt|www|emojiemoji)\\b", "", x, ignore.case = TRUE)  # Remove 'rt', 'www', and 'emojiemoji'
+  x <- gsub("amp", "", x, ignore.case = TRUE)  # Remove 'amp' from HTML encoded '&'
+  x <- gsub("http[s]?://\\S+", "", x)  # Remove URLs
+  return(x)
+}))
+
+# Create DTM and remove sparse terms
+dtm2 <- DocumentTermMatrix(corpus3, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
+dtm2 <- removeSparseTerms(dtm2, sparse = 0.99)  # Adjust sparsity threshold as needed
+```
+
+
+```{r warning=FALSE}
+set.seed(123)
+# Ensure word names are captured
+word_freq2 <- sort(rowSums(as.matrix(dtm2)), decreasing = TRUE)
+top_word_freq2 <- head(word_freq2, 80)
+word_names2 <- colnames(dtm2)
+
+# Generate word cloud using the correct word names
+wordcloud(
+  words = word_names2, 
+  freq = top_word_freq2, 
+  max.words = 80,
+  scale = c(4, 0.5),       # Control for size of the most and least frequent words
+  random.order = FALSE,    # Higher frequency words appear first
+  rot.per = 0.25,          # Allows some rotation for fitting
+  colors = brewer.pal(8, "Dark2")  # Enhances visual appeal
+)
+```
+
+
+
+```{r}
+# Analyze the frequency of different emojis
+emoji_freq <- table(unlist(hslu_zhaw_high_engagement_tweets$emojis))
+sort(emoji_freq, decreasing = TRUE)
+```
 
 
 ## Recommendations
