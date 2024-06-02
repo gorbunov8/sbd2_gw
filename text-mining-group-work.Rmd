@@ -147,8 +147,6 @@ summary(filtered_tweets)
 
 ### Emojis
 
-**Installing and Loading the emo Package:**
-<br>
 The package `emo` is used for emoji analysis in R, which is essential for text data that includes emojis. This is useful for cleaning data, extracting information, or preparing text for further analysis.
 <br>
 Understanding the prevalence of emojis can help analyze sentiment, user engagement, or cultural trends in social media data.
@@ -161,7 +159,7 @@ if (!require("emo")) {
 library(emo)
 ```
 
-```{r}
+```{r include=FALSE}
 # check for the presence of any emojis and tabulates the results.
 table(ji_detect(filtered_tweets$full_text))
 
@@ -176,7 +174,11 @@ filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
 
 
 
-### Data Preprocessing
+### Text Preprocessing
+
+We create a text corpus from `filtered_tweets$clean_text`, where each tweet is treated as a separate document. 
+<br>
+The corpus serves as the foundational structure for text analysis, allowing for uniform processing and manipulation of the text data.
 
 ```{r}
 # Corpus: Collection of text documents that generally serves as a basis for analysis in text processing and text mining.
@@ -185,6 +187,10 @@ filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
 corpus <- Corpus(VectorSource(filtered_tweets$clean_text))
 ```
 
+<br>
+Here we clean the corpus by converting all text to lowercase, removing punctuation, numbers, and stopwords from German, French, Italian, and English, and finally stripping extra spaces.
+<br>
+Cleaning the text is crucial for reducing noise and focusing analyses on meaningful words only. This standardizes the text data, making subsequent analyses like topic modeling or sentiment analysis more effective and less prone to error due to textual inconsistencies.
 
 ```{r}
 
@@ -197,15 +203,23 @@ corpus <- tm_map(corpus, removeWords, stopwords("french"))
 corpus <- tm_map(corpus, removeWords, stopwords("italian"))
 corpus <- tm_map(corpus, removeWords, stopwords("english"))
 corpus <- tm_map(corpus, stripWhitespace)               # Removal of additional spaces
+```
 
+<br>
+Here we create a Document-Term Matrix (DTM) from the corpus, applying additional filters like punctuation removal and stopping word exclusion during the matrix formation. Then, it filters out terms that appear in less than 1% of the documents to reduce sparsity.
+<br>
+Reducing sparsity helps focus on terms that have significant presence across documents, enhancing the reliability and performance of statistical models and algorithms applied later.
+
+```{r}
 # Create DTM and remove sparse terms
 dtm1 <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
 dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as needed
 ```
 
 
+## Tweet Analysis
 
-### Tweet Frequency Analysis
+### Frequency
 
 ```{r}
 # Check the term frequencies
@@ -213,7 +227,7 @@ findFreqTerms(dtm1, lowfreq = 500)  # Shows terms that occur at least 500 times
 ```
 
 
-```{r, fig.width=15, fig.height=10}
+```{r}
 # Ensure word names are captured
 word_freq1 <- sort(rowSums(as.matrix(dtm1)), decreasing = TRUE)
 top_word_freq1 <- head(word_freq1, 25)
