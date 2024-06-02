@@ -456,6 +456,30 @@ ggplot(best_posting_hours1, aes(x = timeofday_hour, y = count)) +
 ```
 
 
+### High Engagement - Days
+
+```{r}
+# Extract the day of the week from 'tweet_date'
+high_engagement_tweets <- high_engagement_tweets %>%
+  mutate(day_of_week = wday(tweet_date, label = TRUE, week_start = 1))  # Adjust 'week_start' if your week starts on a different day
+
+# Analyze and plot tweet counts by day of the week
+best_posting_days1 <- high_engagement_tweets %>%
+  group_by(day_of_week) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count))
+
+# Plotting
+ggplot(best_posting_days1, aes(x = day_of_week, y = count)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  labs(title = "Tweet Engagement by Day of the Week for HSLU and ZHAW",
+       x = "Day of the Week",
+       y = "Number of High Engagement Tweets") +
+  theme_minimal()
+```
+
+
+
 ### Engagement Analysis by University
 
 The bar chart visualizes the total likes accumulated by different universities within the parameter for at least 20 likes or retweets, highlighting variations in engagement across these institutions on social media.
@@ -600,6 +624,28 @@ ggplot(best_posting_hours, aes(x = timeofday_hour, y = count)) +
 ```
 
 
+### HSLU & ZHAW Engagement - Days
+
+
+```{r}
+# Extract the day of the week from 'tweet_date'
+hslu_zhaw_high_engagement_tweets <- hslu_zhaw_high_engagement_tweets %>%
+  mutate(day_of_week = wday(tweet_date, label = TRUE, week_start = 1))  # Adjust 'week_start' if your week starts on a different day
+
+# Analyze and plot tweet counts by day of the week
+best_posting_days <- hslu_zhaw_high_engagement_tweets %>%
+  group_by(day_of_week) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count))
+
+# Plotting
+ggplot(best_posting_days, aes(x = day_of_week, y = count)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  labs(title = "Tweet Engagement by Day of the Week for HSLU and ZHAW",
+       x = "Day of the Week",
+       y = "Number of High Engagement Tweets") +
+  theme_minimal()
+```
 
 
 ## BFH Frequency Analysis
