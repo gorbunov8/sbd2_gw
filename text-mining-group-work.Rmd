@@ -437,6 +437,23 @@ emoji_freq1 <- table(unlist(high_engagement_tweets$emojis))
 sort(emoji_freq1, decreasing = TRUE)
 ```
 
+```{r}
+# Analyze and plot tweet counts by hour to find the best posting times
+best_posting_hours1 <- high_engagement_tweets %>%
+  group_by(timeofday_hour) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count))
+
+# Plotting
+ggplot(best_posting_hours1, aes(x = timeofday_hour, y = count)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Tweet Engagement by Hour",
+       x = "Hour of the Day",
+       y = "Number of High Engagement Tweets") +
+  theme_minimal()
+
+```
+
 
 ### Engagement Analysis by University
 
@@ -451,7 +468,7 @@ high_engagement_tweets %>%
   group_by(university) %>%
   summarize(total_likes = sum(favorite_count), total_retweets = sum(retweet_count), .groups = 'drop') %>%
   ggplot(aes(x = reorder(university, total_likes), y = total_likes)) +
-  geom_col() +
+  geom_col(stat = "identity", fill = "steelblue") +
   coord_flip() +
   labs(title = "Engagement Analysis by University", x = "University", y = "Total Likes")
 ```
@@ -560,6 +577,25 @@ wordcloud(
 emoji_freq <- table(unlist(hslu_zhaw_high_engagement_tweets$emojis))
 sort(emoji_freq, decreasing = TRUE)
 ```
+
+
+```{r}
+# Analyze and plot tweet counts by hour to find the best posting times
+best_posting_hours <- hslu_zhaw_high_engagement_tweets %>%
+  group_by(timeofday_hour) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count))
+
+# Plotting
+ggplot(best_posting_hours, aes(x = timeofday_hour, y = count)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Tweet Engagement by Hour for HSLU and ZHAW",
+       x = "Hour of the Day",
+       y = "Number of High Engagement Tweets") +
+  theme_minimal()
+```
+
+
 
 
 ## BFH Frequency Analysis
