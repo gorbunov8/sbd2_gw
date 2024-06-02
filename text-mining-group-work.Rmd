@@ -34,6 +34,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r data, include=FALSE}
 # Load data set and make a copy of the original
+set.seed(123)
 options(scipen=999)
 Tweets_all <- load("Tweets_all.rda")
 ```
@@ -131,6 +132,7 @@ filtered_tweets <- tweets[tweets$lang %in% c("de", "it", "fr", "en"), ]
 # Check the resulting language distribution
 table(filtered_tweets$lang)
 ```
+
 <br>
 
 This gives us the new Summeray of the data set:
@@ -274,7 +276,7 @@ dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as n
 
 <br>
 
-**Analyze:**
+**Analyze Terms:**
 <br>
 
 - Words like "innov" (innovation), "entwickelt" (developed), and "neuen" (new) indicate a strong emphasis on innovation, research, and development within the academic or professional discussions.
@@ -306,6 +308,21 @@ wordcloud(
 )
 ```
 
+### Emoji Frequency in Tweets
+
+**Top Emojis:**
+<br>
+
+- ➡️ (414) and ⤵️ (247): These arrows could be used to direct attention to links, resources, or to continue reading more content, suggesting active engagement strategies in tweets.
+- 👉 (180): Often used to point towards a link or an important aspect, reinforcing the directional use of emojis to highlight specific content.
+- 📖 (117): Likely symbolizes reading or educational content, which is apt for universities sharing academic resources or promoting courses.
+- 🔎 (97): Represents searching or exploring, possibly used in contexts of research, inquiry, or to emphasize the exploration of new ideas.
+
+```{r}
+# Analyze the frequency of different emojis and select the top 50
+emoji_freq <- table(unlist(filtered_tweets$emojis))
+sort(emoji_freq, decreasing = TRUE)[1:50]
+```
 
 
 
@@ -365,11 +382,14 @@ dtm <- removeSparseTerms(dtm, sparse = 0.99)  # Adjust sparsity threshold as nee
 The word cloud effectively illustrates which topics are most engaging within the parameter for at least 20 likes or retweets. This visualization can help in refining the communication and engagement strategies by focusing on the topics that naturally engage your audience.
 <br>
 
-- The word cloud highlights Words like "digital," "Data," and "Open" emphasize a strong focus on digital innovation and open data or technology. This suggests that tweets discussing digital technologies or data transparency tend to receive higher engagement.
-- Terms such as "forscherteam" (research team), "univers" (universities), and "lab" indicate that the content related to academic research or laboratory work resonates well with the audience. This could be within a university setting or tech-related academic research.
-- Words like "revolutionieren" (revolutionize), "entwickelt" (developed), and "chanc" (chances) suggest discussions around innovation and development are highly engaging.
-- "Gespräch" (conversation/discussion) indicates that interactive or discussion-based tweets, perhaps those inviting comments or thoughts from the community, are among those that receive more likes and retweets.
-- Words like "mithilf" (with help) and phrases possibly related to collaboration highlight the community.
+- **"forscherteam" (research team) and "entwickelt" (developed):** suggest a strong emphasis on research and development topics.
+- **"lab":** indicates discussions possibly related to laboratory work or scientific studies.
+- **"data" and "digital":** reflect a focus on digital technologies and data science, crucial in contemporary research and education.
+- **"open":** could relate to open source, open access, or openness in research and education, pointing towards transparency and accessibility in academic resources.
+- **"nein" (no) and "wieso" (why):** might indicate debates or discussions, possibly questioning certain methods or findings.
+- **"schweizer" (Swiss):** identifies the national or cultural context, implying that the content is likely relevant to or originating from Swiss institutions or discussing Swiss innovations.
+- **"gespräch" (conversation):** underscores the interactive or dialogical nature of the tweets, suggesting that engagement may be driven by conversational or discursive posts.
+- **Not well cleaned elements:** The presence of strings like "http" might be artifacts from URLs or specific hashtags, which although not directly meaningful, indicate the inclusion of links or specific calls to action in the tweets.
 
 ```{r warning=FALSE}
 set.seed(123)
