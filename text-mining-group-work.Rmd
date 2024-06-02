@@ -458,6 +458,8 @@ ggplot(best_posting_hours1, aes(x = timeofday_hour, y = count)) +
 
 ### High Engagement - Days
 
+It shows that Monday and Tuesday are the days with the highest engagement, indicating these might be optimal days for posting to maximize visibility and interaction. The engagement noticeably declines as the week progresses, with the lowest engagement occurring over the weekend, suggesting less audience activity during these days.
+
 ```{r}
 # Extract the day of the week from 'tweet_date'
 high_engagement_tweets <- high_engagement_tweets %>%
@@ -472,7 +474,7 @@ best_posting_days1 <- high_engagement_tweets %>%
 # Plotting
 ggplot(best_posting_days1, aes(x = day_of_week, y = count)) +
   geom_bar(stat = "identity", fill = "coral") +
-  labs(title = "Tweet Engagement by Day of the Week for HSLU and ZHAW",
+  labs(title = "Tweet Engagement by Day of the Week",
        x = "Day of the Week",
        y = "Number of High Engagement Tweets") +
   theme_minimal()
@@ -560,7 +562,11 @@ dtm2 <- removeSparseTerms(dtm2, sparse = 0.99)  # Adjust sparsity threshold as n
 The word cloud illustrates which topics are most engaging within the parameter for at least 10 likes or retweets.
 <br>
 
-- 
+- **Environmental Focus:** Terms like "Klimaziel" suggest discussions around climate goals, indicating a strong environmental or sustainability focus within the discourse.
+- **Economic Impact:** Words such as "profitieren" and "Beitrag" highlight discussions on economic benefits and contributions, potentially related to how environmental goals can align with economic gains.
+- **Educational Context:** The presence of "ZHAW" directly ties the content to the Zurich University of Applied Sciences, suggesting these topics are relevant to university-led discussions or initiatives.
+- **National Relevance:** The inclusion of "Schweiz" ties the discussions to Switzerland, indicating that these topics are of national interest, potentially discussing Swiss policies or initiatives regarding sustainability.
+- **Not well cleaned elements:** The presence of strings like "httpstcoezfrwxu" might be artifacts from URLs, which although not directly meaningful, indicate the inclusion of links or specific calls to action in the tweets.
 
 
 ```{r warning=FALSE}
@@ -584,7 +590,9 @@ wordcloud(
 
 ### HSLU & ZHAW Engagement - Emojis
 
-
+- **Direction:** The use of right arrow" (➡️) or "right-pointing finger" (👉), suggests a focus on direction or continuation, potentially indicating links or further content. 
+- **Positive Emojis:** The inclusion of positive emojis like "yellow heart" (💛), or "smiley face" (😀)  indicates a friendly, positive communication style. 
+- **Local Topics:** The Swiss flag (🇨🇭) might be used in contexts relating to national pride or local topics. Overall, these emojis contribute to engaging and positive social media interactions, which could be part of why these universities have higher engagement rates.
 
 ```{r}
 # Analyze the frequency of different emojis
@@ -595,7 +603,7 @@ sort(emoji_freq, decreasing = TRUE)
 
 ### HSLU & ZHAW Engagement - Hours
 
-
+The early morning (8 AM) and late afternoon to early evening (17 PM and 18 PM) are the most effective times to post content that is likely to get high engagement. It suggests that timing posts to align with these peak periods could enhance visibility and interaction for the universities social media content.
 
 ```{r}
 # Analyze and plot tweet counts by hour to find the best posting times
@@ -616,6 +624,7 @@ ggplot(best_posting_hours, aes(x = timeofday_hour, y = count)) +
 
 ### HSLU & ZHAW Engagement - Days
 
+This graph illustrates the distribution of high engagement tweets for HSLU and ZHAW by day of the week, showing that Tuesday is the most effective day to post on Twitter for maximizing engagement at these universities. The sharp drop in engagement over the weekend further supports the trend that weekdays, particularly the beginning of the week, are optimal for reaching the audience.
 
 ```{r}
 # Extract the day of the week from 'tweet_date'
@@ -693,7 +702,7 @@ The word cloud illustrates which topics have the highest frequency.
 <br>
 
 - **Practical and Innovative Focus:** Terms like "Praxis" (practice) and "Innov" (innovation) indicate a strong link between academic content and real-world applications, appealing particularly to an audience interested in actionable and cutting-edge information.
-- "*Community and Collaboration:"* Words such as "zusammen" (together) and "unsere" (our) reflect a community-focused approach, promoting collective efforts and teamwork within the university setting.
+- **Community and Collaboration:** Words such as "zusammen" (together) and "unsere" (our) reflect a community-focused approach, promoting collective efforts and teamwork within the university setting.
 - **Local Identity and Quality:** The mention of "Schweizer" (Swiss) suggests content with a national focus, likely resonating with local pride, while "Qualität" (quality) underscores the university’s commitment to high standards in education and research.
 
 
@@ -733,6 +742,52 @@ wordcloud(
 # Analyze the frequency of different emojis
 emoji_freq3 <- table(unlist(bfh_tweets$emojis))
 sort(emoji_freq3, decreasing = TRUE)[1:30]
+```
+
+
+### BFH Engagement - Hours
+
+The highest volume of tweets is sent between 08:00 and 09:00, with a notable peak also around 06:00. There's a gradual decline in tweet activity as the day progresses, especially after 17:00, indicating lower activity in the evening.
+
+```{r}
+# Analyze and plot tweet counts by hour to find the best posting times
+best_posting_hours2 <- bfh_tweets %>%
+  group_by(timeofday_hour) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count))
+
+# Plotting
+ggplot(best_posting_hours2, aes(x = timeofday_hour, y = count)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Tweet Frequency by Hour for BFH",
+       x = "Hour of the Day",
+       y = "Number of Frequency Tweets") +
+  theme_minimal()
+```
+
+
+### BFH Engagement - Days
+
+The data shows a consistently high level of tweeting activity from Monday through Friday, with the peak on Wednesday, followed by a sharp decline during the weekend. 
+
+```{r}
+# Extract the day of the week from 'tweet_date'
+bfh_tweets <- bfh_tweets %>%
+  mutate(day_of_week = wday(tweet_date, label = TRUE, week_start = 1))  # Adjust 'week_start' if your week starts on a different day
+
+# Analyze and plot tweet counts by day of the week
+best_posting_days2 <- bfh_tweets %>%
+  group_by(day_of_week) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  arrange(desc(count))
+
+# Plotting
+ggplot(best_posting_days2, aes(x = day_of_week, y = count)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  labs(title = "Tweet Frequency by Day of the Week for BFH",
+       x = "Day of the Week",
+       y = "Number of Frequency Tweets") +
+  theme_minimal()
 ```
 
 
