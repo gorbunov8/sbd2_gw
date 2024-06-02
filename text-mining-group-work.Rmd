@@ -209,7 +209,8 @@ corpus <- tm_map(corpus, content_transformer(function(x) {
   x <- gsub("–", "", x)
   x <- gsub("…", "", x) 
   x <- gsub("«", "", x) 
-  x <- gsub("rt", "", x, ignore.case = TRUE)  # Remove 'rt' used in retweets
+  x <- gsub("»", "", x) 
+  x <- gsub("\\b(rt|www|emojiemoji)\\b", "", x, ignore.case = TRUE)  # Remove 'rt', 'www', and 'emojiemoji'
   x <- gsub("amp", "", x, ignore.case = TRUE)  # Remove 'amp' from HTML encoded '&'
   x <- gsub("http[s]?://\\S+", "", x)  # Remove URLs
   return(x)
@@ -225,7 +226,6 @@ Reducing sparsity helps focus on terms that have significant presence across doc
 # Create DTM and remove sparse terms
 dtm1 <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
 dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as needed
-?stopwords
 ```
 
 
@@ -233,11 +233,11 @@ dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as n
 
 ### Frequency
 
-The function returns a vector of terms that meet the specified frequency threshold. In this case, terms such as "schweizer", "bfh", "neuen", "emoji", and others are listed, indicating they are common within the dataset. By setting a high frequency threshold (e.g., 200 occurrences), you can focus on terms that are more relevant across the dataset.
+The function returns a vector of terms that meet the specified frequency threshold. In this case, terms such as "schweizer", "bfh", "neuen", "emoji", and others are listed, indicating they are common within the dataset. By setting a high frequency threshold (e.g., 25 occurrences), you can focus on terms that are more relevant across the dataset.
 
 ```{r}
 # Check the term frequencies
-findFreqTerms(dtm1, lowfreq = 25)  # Shows terms that occur at least 500 times
+findFreqTerms(dtm1, lowfreq = 25)  # Shows terms that occur at least 25 times
 ```
 
 <br>
@@ -268,7 +268,7 @@ wordcloud(
 
 ```{r, fig.width=15, fig.height=10}
 # Code to analyze tweet frequencies by time and university
-filtered_tweets %>%
+p1<- filtered_tweets %>%
   mutate(tweet_month = floor_date(created_at, "month")) %>%
   group_by(university, tweet_month) %>%
   summarize(count = n(), .groups = 'drop') %>%
@@ -276,85 +276,95 @@ filtered_tweets %>%
   geom_col(position = "dodge") +
   theme_minimal() +
   labs(title = "Monthly Tweet Frequency by University", x = "Year", y = "Number of Tweets")
-````
 
+# Convert to interactive plotly object
+interactive_plot <- ggplotly(p1, tooltip = "text")
 
+# Optionally, add configurations to enhance interaction
+interactive_plot <- interactive_plot %>% layout(
+  hovermode = 'closest',
+  title = "Click on a University to see its Tweet Trends",
+  showlegend = TRUE
+)
 
-
-```{r, fig.width=15, fig.height=10}
-# Code um Tweet-Frequenzen nach Zeit und Universität zu analysieren
-# Fokus nur auf BFH
-bfh_tweets <- filtered_tweets %>%
-  filter(university == "bfh") %>%  # Filter um nur BFH zu berücksichtigen
-  mutate(tweet_month = floor_date(created_at, "month")) %>%
-  group_by(tweet_month) %>%
-  summarize(count = n(), .groups = 'drop')
-
-# Verwendung von scale_fill_gradient() für einen Farbverlauf
-ggplot(bfh_tweets, aes(x = tweet_month, y = count, fill = count)) +
-  geom_col() +
-  scale_fill_gradient(low = "lightblue", high = "blue") +
-  theme_minimal() +
-  labs(title = "Monthly Tweet Frequency for BFH", x = "Year", y = "Number of Tweets")
-```
-
-```{r, fig.width=15, fig.height=10}
-# Angenommen, es gibt spezielle Ereignisse im Mai jedes Jahres
-bfh_tweets$event <- ifelse(format(as.Date(bfh_tweets$tweet_month), "%m") == "05", "Event", "Normal")
-
-# Visualisierung mit spezieller Farbgebung für Ereignisse
-ggplot(bfh_tweets, aes(x = tweet_month, y = count, fill = event)) +
-  geom_col(show.legend = TRUE) +
-  scale_fill_manual(values = c("Event" = "red", "Normal" = "gray")) +
-  theme_minimal() +
-  labs(title = "Monthly Tweet Frequency for BFH", x = "Year", y = "Number of Tweets")
-
+interactive_plot
 ```
 
 
 
+## High Engagement
 
-### Content Analysis
+
+This section sets a variable `engagement_threshold` to 20, which is used as the minimum number of likes or retweets a tweet must have to be considered as having "high engagement". This threshold helps to focus on tweets that have garnered more attention and interaction.
 
 ```{r}
-### Content Analysis
-
-# Set a threshold for "high engagement" (e.g., tweets with at least 10 likes or retweets)
-engagement_threshold <- 10
+# Set a threshold for "high engagement" (e.g., tweets with at least 20 likes or retweets)
+engagement_threshold <- 20
 
 # Filter tweets based on this engagement threshold
-#high_engagement_tweets <- tweets %>%
-#  filter(favorite_count >= engagement_threshold | retweet_count >= engagement_threshold)
 high_engagement_tweets <- filtered_tweets %>%
   filter(favorite_count >= engagement_threshold | retweet_count >= engagement_threshold)
+```
 
 
+<br>
+
+Also for the `high_engagement_tweets` we clean the corpus by converting all text to lowercase, removing punctuation, numbers, and stopwords from German, French, Italian, and English, and finally stripping extra spaces and we create a Document-Term Matrix (DTM) from this corpus.
+
+
+```{r warning=FALSE}
 # Rebuild the corpus with the sampled data
-#corpus <- Corpus(VectorSource(tweets_sample$full_text)) 
-corpus <- Corpus(VectorSource(filtered_tweets$clean_text)) 
-corpus <- tm_map(corpus, content_transformer(tolower))
-corpus <- tm_map(corpus, removePunctuation)
-corpus <- tm_map(corpus, removeNumbers)
-corpus <- tm_map(corpus, removeWords, stopwords("german"))  # Removing stop words
-corpus <- tm_map(corpus, removeWords, stopwords("french"))
-corpus <- tm_map(corpus, removeWords, stopwords("italian"))
-corpus <- tm_map(corpus, removeWords, stopwords("english"))
+corpus2 <- Corpus(VectorSource(high_engagement_tweets$clean_text)) 
 
+corpus2 <- tm_map(corpus2, content_transformer(tolower))  # Convert to lower case
+corpus2 <- tm_map(corpus2, removePunctuation)             # Removing punctuation marks
+corpus2 <- tm_map(corpus2, removeNumbers)                 # Removing numbers
+corpus2 <- tm_map(corpus2, removeWords, stopwords("german"))  # Removing stop words
+corpus2 <- tm_map(corpus2, removeWords, stopwords("french"))
+corpus2 <- tm_map(corpus2, removeWords, stopwords("italian"))
+corpus2 <- tm_map(corpus2, removeWords, stopwords("english"))
+corpus2 <- tm_map(corpus2, stripWhitespace)               # Removal of additional spaces
+corpus2 <- tm_map(corpus2, stemDocument) #remove suffixes, etc.; only root form of the word
+
+# Further clean the text by removing specific web/text symbols and terms
+corpus2 <- tm_map(corpus2, content_transformer(function(x) {
+  x <- gsub("–", "", x)
+  x <- gsub("…", "", x) 
+  x <- gsub("«", "", x) 
+  x <- gsub("»", "", x) 
+  x <- gsub("\\b(rt|www|emojiemoji)\\b", "", x, ignore.case = TRUE)  # Remove 'rt', 'www', and 'emojiemoji'
+  x <- gsub("amp", "", x, ignore.case = TRUE)  # Remove 'amp' from HTML encoded '&'
+  x <- gsub("http[s]?://\\S+", "", x)  # Remove URLs
+  return(x)
+}))
 
 # Create DTM and remove sparse terms
-dtm <- DocumentTermMatrix(corpus, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
+dtm <- DocumentTermMatrix(corpus2, control = list(removePunctuation = TRUE, stopwords = TRUE, wordLengths = c(1, Inf)))
 dtm <- removeSparseTerms(dtm, sparse = 0.99)  # Adjust sparsity threshold as needed
+```
 
+<br>
+
+The word cloud effectively illustrates which topics are most engaging within the parameter for at least 20 likes or retweets. This visualization can help in refining the communication and engagement strategies by focusing on the topics that naturally engage your audience.
+<br>
+
+- The word cloud highlights Words like "digital," "Data," and "Open" emphasize a strong focus on digital innovation and open data or technology. This suggests that tweets discussing digital technologies or data transparency tend to receive higher engagement.
+- Terms such as "forscherteam" (research team), "univers" (universities), and "lab" indicate that the content related to academic research or laboratory work resonates well with the audience. This could be within a university setting or tech-related academic research.
+- Words like "revolutionieren" (revolutionize), "entwickelt" (developed), and "chanc" (chances) suggest discussions around innovation and development are highly engaging.
+- "Gespräch" (conversation/discussion) indicates that interactive or discussion-based tweets, perhaps those inviting comments or thoughts from the community, are among those that receive more likes and retweets.
+- Words like "mithilf" (with help) and phrases possibly related to collaboration highlight the community.
+
+```{r warning=FALSE}
 # Ensure word names are captured
 word_freq <- sort(rowSums(as.matrix(dtm)), decreasing = TRUE)
-top_word_freq <- head(word_freq, 25)
+top_word_freq <- head(word_freq, 80)
 word_names <- colnames(dtm)
 
 # Generate word cloud using the correct word names
 wordcloud(
   words = word_names, 
   freq = top_word_freq, 
-  max.words = 25,
+  max.words = 80,
   scale = c(4, 0.5),       # Control for size of the most and least frequent words
   random.order = FALSE,    # Higher frequency words appear first
   rot.per = 0.25,          # Allows some rotation for fitting
@@ -365,6 +375,8 @@ wordcloud(
 
 ### Engagement Analysis
 
+
+
 ```{r}
 # Analysis of likes and retweets
 filtered_tweets %>%
@@ -374,7 +386,6 @@ filtered_tweets %>%
   geom_col() +
   coord_flip() +
   labs(title = "Engagement Analysis by University", x = "University", y = "Total Likes")
-
 ```
 
 
