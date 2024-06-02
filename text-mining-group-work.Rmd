@@ -55,7 +55,7 @@ The dataset consists 19'575 observations and 14 variables:
 - The median tweet date is April 13, 2018, suggesting that half of the tweets were posted after this date and the data is skewed
 <br>
 
-*Retweet and Favorite Counts:**
+**Retweet and Favorite Counts:**
 <br>
 
 - The data shows a minimum of 0 and a maximum of 267 retweets and 188 likes per tweet
@@ -174,7 +174,50 @@ filtered_tweets$emojis <- sapply(filtered_tweets$full_text, ji_extract_all)
 
 
 
-### Text Preprocessing
+## Tweet Analysis
+
+In this section we will analyze the tweets of Swiss universities.
+
+### Tweet Frequency over Time
+
+Each histogram shows fluctuations in tweet volumes over the years
+<br>
+- **Universities like HSLU and ZHAW:** Display prominent peaks at certain intervals, possibly indicating targeted social media campaigns or significant events that engaged the university community.
+- **Other Universities (e.g., BFH, FHNW):** Some show a steady level of activity with occasional spikes, while others might exhibit a decline or increase in activity, suggesting changes in social media strategy or external factors impacting engagement.
+
+```{r}
+# Code to analyze tweet frequencies by time and university
+p1<- filtered_tweets %>%
+  mutate(tweet_month = floor_date(created_at, "month")) %>%
+  group_by(university, tweet_month) %>%
+  summarize(count = n(), .groups = 'drop') %>%
+  ggplot(aes(x = tweet_month, y = count, fill = university)) +
+  geom_col(position = "dodge") +
+  theme_minimal() +
+  labs(title = "Monthly Tweet Frequency by University", x = "Year", y = "Number of Tweets")
+
+# Convert to interactive plotly object
+interactive_plot <- ggplotly(p1, tooltip = "text")
+
+# Optionally, add configurations to enhance interaction
+interactive_plot <- interactive_plot %>% layout(
+  hovermode = 'closest',
+  title = "Click on a University to see its Tweet Trends",
+  showlegend = TRUE
+)
+
+interactive_plot
+```
+
+
+### Tweet Frequency of Terms
+
+Here we returns terms that meet the high frequency threshold. 
+<br>
+<br>
+
+**Text Preprocessing**
+<br>
 
 We create a text corpus from `filtered_tweets$clean_text`, where each tweet is treated as a separate document. 
 <br>
@@ -229,22 +272,20 @@ dtm1 <- removeSparseTerms(dtm1, sparse = 0.99)  # Adjust sparsity threshold as n
 ```
 
 
-## Tweet Analysis
-
-### Frequency
-
-The function returns a vector of terms that meet the specified frequency threshold. In this case, terms such as "schweizer", "bfh", "neuen", "emoji", and others are listed, indicating they are common within the dataset. By setting a high frequency threshold (e.g., 25 occurrences), you can focus on terms that are more relevant across the dataset.
-
-```{r}
-# Check the term frequencies
-findFreqTerms(dtm1, lowfreq = 25)  # Shows terms that occur at least 25 times
-```
-
 <br>
 
-Words like "schweizer" (Swiss), "unternehmen" (companies), "zukunft" (future), "innov" (innovation), and "digital" suggest that the text data heavily revolves around themes of Swiss companies, innovation, and digital advancements.
+**Analyze:**
 <br>
-Frequent appearance of terms like "dank" (thanks), "neue" (new), "mehr" (more), and "info" indicate common communication patterns possibly related to news dissemination or updates about new developments and initiatives.
+
+- Words like "innov" (innovation), "entwickelt" (developed), and "neuen" (new) indicate a strong emphasis on innovation, research, and development within the academic or professional discussions.
+- "Zukunft" (future) and "digital" further emphasize the forward-looking and technology-oriented nature of the discourse.
+- Specific references to institutions like "FHNW" (University of Applied Sciences and Arts Northwestern Switzerland) and "BFH" (Bern University of Applied Sciences) highlight the involvement or activities of these entities.
+- "Schweizer" (Swiss) suggests a national context, likely focusing on Swiss education or research initiatives.
+- "dank" (thanks) and "zeigt" (shows) could imply a tone of gratitude or showcasing achievements, projects, or important information.
+- "info" and "arbeit" (work) suggest that these tweets might include informative content about work or studies.
+- "emoji" hints at the use of digital expressions to convey emotions more effectively within tweets.
+- "gespräch" (conversation) and "gemeinsam" (together) emphasize communication and collaboration.
+- "heut" (today), "uhr" (hour/time), and "jahr" (year) indicate time-specific references, possibly relating to events, deadlines, or anniversaries.
 
 ```{r warning=FALSE}
 set.seed(123)
@@ -267,33 +308,8 @@ wordcloud(
 
 
 
-```{r, fig.width=15, fig.height=10}
-# Code to analyze tweet frequencies by time and university
-p1<- filtered_tweets %>%
-  mutate(tweet_month = floor_date(created_at, "month")) %>%
-  group_by(university, tweet_month) %>%
-  summarize(count = n(), .groups = 'drop') %>%
-  ggplot(aes(x = tweet_month, y = count, fill = university)) +
-  geom_col(position = "dodge") +
-  theme_minimal() +
-  labs(title = "Monthly Tweet Frequency by University", x = "Year", y = "Number of Tweets")
 
-# Convert to interactive plotly object
-interactive_plot <- ggplotly(p1, tooltip = "text")
-
-# Optionally, add configurations to enhance interaction
-interactive_plot <- interactive_plot %>% layout(
-  hovermode = 'closest',
-  title = "Click on a University to see its Tweet Trends",
-  showlegend = TRUE
-)
-
-interactive_plot
-```
-
-
-
-## High Engagement
+### High Engagement
 
 
 This section sets a variable `engagement_threshold` to 20, which is used as the minimum number of likes or retweets a tweet must have to be considered as having "high engagement". This threshold helps to focus on tweets that have garnered more attention and interaction.
