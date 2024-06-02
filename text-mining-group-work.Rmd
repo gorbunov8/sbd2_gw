@@ -375,11 +375,14 @@ wordcloud(
 
 ### Engagement Analysis
 
-
+The bar chart visualizes the total likes accumulated by different universities within the parameter for at least 20 likes or retweets, highlighting variations in engagement across these institutions on social media.
+<br>
+The visualization clearly shows which universities are receiving the most engagement in terms of likes. HSLU (Lucerne University of Applied Sciences and Arts) and ZHAW (Zurich University of Applied Sciences) stands out with the highest engagement, significantly more than other institutions.
+So institutions like HSLU and ZHAW, offering a pathway for others to refine their social media tactics.
 
 ```{r}
 # Analysis of likes and retweets
-filtered_tweets %>%
+high_engagement_tweets %>%
   group_by(university) %>%
   summarize(total_likes = sum(favorite_count), total_retweets = sum(retweet_count), .groups = 'drop') %>%
   ggplot(aes(x = reorder(university, total_likes), y = total_likes)) +
