@@ -77,6 +77,7 @@ The dataset consists of 19'575 observations and 14 variables:
 
 **ID and String Variables:**
 <br>
+
 - The `id` and `id_str` fields are technical identifiers for tweets, indicating that tweets have been collected over a wide range of tweets
 <br>
 
