@@ -29,7 +29,8 @@ We use several libraries to process the tasks and get the output that is asked f
 
 ```{r library, include=FALSE}
 # Load packages and libraries, if not already available.
-libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC", "text", "remotes", "plotly")
+options(repos = c(CRAN = "https://cloud.r-project.org/"))
+libraries = c("ggplot2", "knitr", "dplyr", "tidyverse", "lubridate", "tm", "wordcloud", "SnowballC", "text", "remotes", "plotly", "prettydoc")
 
 lapply(libraries, function(x) if (!(x %in% installed.packages())) {
   install.packages(x)
